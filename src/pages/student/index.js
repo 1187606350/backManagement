@@ -1,3 +1,3 @@
 export default function() {
-  return <div>首页</div>;
+  return <div>学生</div>;
 }

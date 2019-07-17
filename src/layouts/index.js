@@ -1,12 +1,25 @@
 import styles from './index.css';
+import Header from './../../components/header';
+import Menu from './../../components/Menu';
+const SimpleLayout = props => {
+  return <div>{props.children}</div>;
+};
 
-function BasicLayout(props) {
+export default function(props) {
+  if (props.location.pathname === '/login') {
+    return <SimpleLayout {...props} />;
+  }
   return (
-    <div className={styles.normal}>
-      <h1 className={styles.title}>Yay! Welcome to umi!</h1>
-      {props.children}
+    <div className={styles.container}>
+      <div className={styles.top}>
+        <Header />
+      </div>
+      <div className={styles.bottom}>
+        <div className={styles.bleft}>
+          <Menu />
+        </div>
+        <div className={styles.bright}>{props.children}</div>
+      </div>
     </div>
   );
 }
-
-export default BasicLayout;
