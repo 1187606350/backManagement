@@ -1,8 +1,8 @@
-import styles from './index.css';
+import styles from './index.less';
 import Header from './../../components/header';
 import Menu from './../../components/Menu';
 const SimpleLayout = props => {
-  return <div>{props.children}</div>;
+  return <div className={styles.container}>{props.children}</div>;
 };
 
 export default function(props) {

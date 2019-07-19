@@ -1,6 +1,7 @@
 import { Form, Button, Input } from 'antd';
 import styles from './index.less';
 import { connect } from 'dva';
+
 const Login = props => {
   let { getFieldDecorator } = props.form;
   return (
