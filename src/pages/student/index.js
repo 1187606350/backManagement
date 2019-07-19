@@ -1,14 +1,12 @@
-import { Table, Input, Button, Modal, Form } from 'antd';
+import { Table, Input, Button, Modal, Form, InputNumber, Radio } from 'antd';
 import React from 'react';
 import { connect } from 'dva';
 class Student extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      visible: false,
-      curInput: {},
-    };
-  }
+  state = {
+    visible: false,
+    curInput: {},
+  };
+
   columns = [
     {
       title: 'Id',
@@ -41,15 +39,22 @@ class Student extends React.Component {
             <Button
               type="primary"
               onClick={() => {
-                console.log(row);
-
-                this.showModal(row);
+                this.setState({
+                  visible: true,
+                  curInput: row,
+                });
               }}
             >
               修改
             </Button>
 
-            <Button>删除</Button>
+            <Button
+              onClick={() => {
+                this.props.delStu(row.id);
+              }}
+            >
+              删除
+            </Button>
           </div>
         );
       },
@@ -57,9 +62,9 @@ class Student extends React.Component {
   ];
 
   render() {
-    const { Search } = Input;
-    const { getFieldDecorator } = this.props.form;
-    let { name, age, sex } = this.state.curInput;
+    let { Search } = Input;
+    let { getFieldDecorator } = this.props.form;
+
     let { visible } = this.state;
     return (
       <>
@@ -67,8 +72,8 @@ class Student extends React.Component {
           placeholder="input search text"
           enterButton="Search"
           size="large"
-          onSearch={value => {
-            this.props.getList(1, this.props.limit, value);
+          onSearch={searchValue => {
+            this.props.getList(1, this.props.limit, searchValue);
           }}
         />
         <Table
@@ -86,30 +91,33 @@ class Student extends React.Component {
         <Modal
           title="请输入要修改的内容"
           visible={visible}
-          onOk={() => {
-            this.props.handleOk(this.state.curInput);
-            this.handleOk();
-          }}
+          destroyOnClose
+          onOk={this.handleOk}
           onCancel={this.handleCancel}
         >
-          <Form>
-            <Form.Item>
+          <Form labelCol={{ span: 4 }} wrapperCol={{ span: 12 }}>
+            <Form.Item label="姓名">
               {getFieldDecorator('name', {
                 rules: [{ required: true, message: 'Please input your name!' }],
-                initialValue: name,
-              })(<Input onChange={this.handleInputname.bind(this)} placeholder="name" />)}
+                initialValue: this.state.curInput.name,
+              })(<Input placeholder="name" />)}
             </Form.Item>
-            <Form.Item>
+            <Form.Item label="年龄">
               {getFieldDecorator('age', {
                 rules: [{ required: true, message: 'Please input your age!' }],
-                initialValue: age,
-              })(<Input onChange={this.handleInputage.bind(this)} placeholder="age" />)}
+                initialValue: this.state.curInput.age,
+              })(<InputNumber min={18} max={99} />)}
             </Form.Item>
-            <Form.Item>
+            <Form.Item label="性别">
               {getFieldDecorator('sex', {
                 rules: [{ required: true, message: 'Please input your sex!' }],
-                initialValue: sex,
-              })(<Input onChange={this.handleInputsex.bind(this)} placeholder="sex" />)}
+                initialValue: this.state.curInput.sex,
+              })(
+                <Radio.Group>
+                  <Radio value={1}>男</Radio>
+                  <Radio value={0}>女</Radio>
+                </Radio.Group>,
+              )}
             </Form.Item>
           </Form>
         </Modal>
@@ -117,42 +125,43 @@ class Student extends React.Component {
     );
   }
   handleOk = () => {
-    this.setState({
-      visible: false,
+    this.props.form.validateFields((err, value) => {
+      if (!err) {
+        let item = value;
+        let id = this.state.curInput.id;
+        this.props.changItem(id, item);
+        this.setState({
+          visible: false,
+        });
+      }
     });
   };
-  handleInputname = e => {
-    let value = e.target.value;
+  // handleInputname = e => {
+  //   let value = e.target.value;
+  //   this.setState({
+  //     curInput: { ...this.state.curInput, name: value },
+  //   });
+  // };
+  // handleInputage = e => {
+  //   let value = e.target.value;
 
-    this.setState({
-      curInput: { ...this.state.curInput, name: value },
-    });
-  };
-  handleInputage = e => {
-    let value = e.target.value;
+  //   this.setState({
+  //     curInput: { ...this.state.curInput, age: value },
+  //   });
+  // };
+  // handleInputsex = e => {
+  //   let value = e.target.value;
 
-    this.setState({
-      curInput: { ...this.state.curInput, age: value },
-    });
-  };
-  handleInputsex = e => {
-    let value = e.target.value;
-
-    this.setState({
-      curInput: { ...this.state.curInput, sex: value },
-    });
-  };
+  //   this.setState({
+  //     curInput: { ...this.state.curInput, sex: parseInt(value) },
+  //   });
+  // };
   handleCancel = () => {
     this.setState({
       visible: false,
     });
   };
-  showModal = row => {
-    this.setState({
-      visible: true,
-      curInput: row,
-    });
-  };
+
   componentDidMount() {
     this.props.getList();
   }
@@ -169,29 +178,29 @@ export default connect(
   },
   dispatch => {
     return {
-      getList: (page = 1, pageSize = 5, value = '') => {
+      getList: (page = 1, pageSize = 5, searchValue = '') => {
         dispatch({
           type: 'student/getList',
           page,
           pageSize,
-          value,
+          searchValue,
         });
       },
-      handleOk: item => {
+      changItem: (id, item) => {
+        console.log(item);
         dispatch({
           type: 'student/changItem',
+          id,
           item,
         });
       },
 
-      // getSerachList: value => {
-      //   console.log(value);
-
-      //   dispatch({
-      //     type: 'student/getSerachList',
-      //     value,
-      //   });
-      // },
+      delStu: id => {
+        dispatch({
+          type: 'student/delItem',
+          id,
+        });
+      },
     };
   },
 )(Form.create()(Student));

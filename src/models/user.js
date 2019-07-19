@@ -1,7 +1,7 @@
 export default {
   namespace: 'user',
   state: {
-    username: 'AsukaKiraran',
+    username: '',
   },
   effects: {
     *login(action, { put }) {
